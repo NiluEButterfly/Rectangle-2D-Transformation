@@ -1,0 +1,7 @@
+# python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+# vscode folder
+.vscode/
