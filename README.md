@@ -1,7 +1,7 @@
 # Rectangle 2D Transformation Game
 A simple pygame application to visualize 2D geometric transformations.
 
-<img src="image.png" alt="Deskripsi" width="500">
+<img src="image.png" alt="Deskripsi" width="720">
 
 ## Features
 - **Animation Transform:** Using Translation, Rotation, and Scaling.
