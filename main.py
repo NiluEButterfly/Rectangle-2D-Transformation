@@ -1,10 +1,11 @@
 # ==========================================================
-# PROJECT NAME  : RECTANGLE 2D TRANSFORMATION GAME
-# AUTHOR        :
-# DESCRIPTION   :
+# PROJECT NAME  : Rectangle 2D Transformation
+# DEVELOPE      : NiluEB Development
+# DESCRIPTION   : A simple pygame application to visualize 2D geometric transformations.
 # ==========================================================
 
 # --- LIBRARIES ---
+import asyncio
 import pygame
 import math
 import random
@@ -32,9 +33,9 @@ COLOR4 = "#4C1818" #Back and Quit Button Color
 # Sound Settings
 bg_music = "assets/bgm.ogg"
 current_bgm = None
-click_sound = pygame.mixer.Sound("assets/click.wav")
-win_sound = pygame.mixer.Sound("assets/win.wav")
-wind_sound = pygame.mixer.Sound("assets/wind.wav")
+click_sound = pygame.mixer.Sound("assets/click.ogg")
+win_sound = pygame.mixer.Sound("assets/win.ogg")
+wind_sound = pygame.mixer.Sound("assets/wind.ogg")
 
 # Font Settings
 font_A = pygame.font.Font(None, 60) #Title font
@@ -251,6 +252,7 @@ def handle_win_condition(sort_count, init_tbox):
     if sort_count < 4:
         click_sound.play()
     sort_count += 1
+    is_winning = False
     if diff == 1:
         if sort_count == 1:
             click_sound.play()
@@ -262,9 +264,7 @@ def handle_win_condition(sort_count, init_tbox):
             click_sound.play()
             reset_boxes(init_tbox, angle=45)
         elif sort_count == 4:
-            win_sound.play()
-            condition_win()
-            running_game = False 
+            is_winning = True
     elif diff == 2:
         if sort_count == 1:
             click_sound.play()
@@ -278,9 +278,7 @@ def handle_win_condition(sort_count, init_tbox):
             reset_boxes(init_tbox, angle=45)
             reset_boxes(target_box, 0, random.choice(rm_transy))
         elif sort_count == 4:
-            win_sound.play()
-            condition_win()
-            running_game = False 
+            is_winning = True
     elif diff == 3:
         if sort_count == 1:
             click_sound.play()
@@ -296,14 +294,12 @@ def handle_win_condition(sort_count, init_tbox):
             reset_boxes(target_box, angle=45)
             reset_boxes(target_box, random.choice(rm_transx), 0)
         elif sort_count == 4:
-            win_sound.play()
-            condition_win()
-            running_game = False 
-    return sort_count
+            is_winning = True
+    return sort_count, is_winning
 
 # --- GAME MENU FUNCTIONS ---
 # Main Menu
-def main_menu():
+async def main_menu():
     click = False
     while True:
         screen.fill(COLOR1)
@@ -317,10 +313,10 @@ def main_menu():
         
         if button_start.collidepoint((mx, my)) and click:
             click_sound.play()
-            difficulty()
+            await difficulty()
         if button_credit.collidepoint((mx, my)) and click:
             click_sound.play()
-            credits()
+            await credits()
         if button_quit.collidepoint((mx, my)) and click:
             pygame.quit()
             sys.exit()
@@ -343,9 +339,10 @@ def main_menu():
         
         pygame.display.flip()
         clock.tick(60)
+        await asyncio.sleep(0)
 
 # Choose Difficulty Menu
-def difficulty():
+async def difficulty():
     global diff 
     running_diff = True
     click = False
@@ -375,7 +372,7 @@ def difficulty():
         if button_back.collidepoint((mx, my)) and click:
             click_sound.play()
             running_diff = False
-            main_menu()
+            await main_menu()
         
         pygame.draw.rect(screen, COLOR3, button_easy)
         pygame.draw.rect(screen, COLOR3, button_medium)
@@ -397,10 +394,11 @@ def difficulty():
         
         pygame.display.flip()
         clock.tick(60)
-    game()
+        await asyncio.sleep(0)
+    await game()
 
 # Credits Menu
-def credits():   
+async def credits():   
     click = False
     while True:
         screen.fill(COLOR1)
@@ -414,7 +412,7 @@ def credits():
         button_back = pygame.Rect(WIDTH // 2 - 100, HEIGHT // 2 + 180, 200, 50)
         if button_back.collidepoint((mx, my)) and click:
             click_sound.play()
-            main_menu()
+            await main_menu()
         
         pygame.draw.rect(screen, COLOR4, button_back)
         draw_text('Back', font_a1, WHITE, screen, WIDTH // 2, HEIGHT // 2 + 205)
@@ -429,9 +427,10 @@ def credits():
         
         pygame.display.flip()
         clock.tick(60)
+        await asyncio.sleep(0)
 
 # Game Menu
-def game():
+async def game():
     global player_box, target_box, animating, start_points, end_points, active, selected_active, diff
     player_box = [(-1, -1), (1, -1), (1, 1), (-1, 1)]
     init_tbox = [(-1, -1), (1, -1), (1, 1), (-1, 1)]
@@ -474,7 +473,7 @@ def game():
                         break
                     if button_tutorial.collidepoint(event.pos):
                         click_sound.play()
-                        tutorial()
+                        await tutorial()
                         break
                     if button_reset.collidepoint(event.pos):
                         click_sound.play()
@@ -482,7 +481,7 @@ def game():
                     if button_back.collidepoint(event.pos):
                         click_sound.play()
                         running_game = False
-                        main_menu()
+                        await main_menu()
                 else:
                     active = None
             if event.type == pygame.KEYDOWN and active:
@@ -490,14 +489,21 @@ def game():
         if animating:
             animate_movement(start_points, end_points)
         if sorted(player_box) == sorted(target_box):
-            sort_count = handle_win_condition(sort_count, init_tbox)
+            sort_count, has_won = handle_win_condition(sort_count, init_tbox)
+
+            if has_won:
+                win_sound.play()
+                await condition_win()
+                running_game = False
+                break
         pygame.display.flip()
         clock.tick(60)
+        await asyncio.sleep(0)
         
-    main_menu()
+    await main_menu()
 
 # Tutorial Menu
-def tutorial():   
+async def tutorial():   
     click = False
     in_credits_run = True
     while in_credits_run:
@@ -532,9 +538,10 @@ def tutorial():
                 click = True
         pygame.display.flip()
         clock.tick(60)
+        await asyncio.sleep(0)
 
 # Winning Menu
-def condition_win():
+async def condition_win():
     click = False
     while True:
         screen.fill(COLOR1)        
@@ -544,7 +551,7 @@ def condition_win():
         
         if button_back.collidepoint((mx, my)) and click:
             click_sound.play()
-            main_menu()
+            await main_menu()
         
         pygame.draw.rect(screen, COLOR3, text_win)
         pygame.draw.rect(screen, COLOR4, button_back)
@@ -562,7 +569,8 @@ def condition_win():
         
         pygame.display.flip()
         clock.tick(60)
+        await asyncio.sleep(0)
 
 if __name__ == "__main__":
     play_bgm(bg_music)
-    main_menu()
+    asyncio.run(main_menu())
