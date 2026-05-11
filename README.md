@@ -23,4 +23,4 @@ pygame>=2.6.1
 ## Credits
 Background Music: *Eclipse* by Jim Yosef (NCS).
 
-**Developed by NiluEB Development**
+## **Developed by NiluEB Development**
