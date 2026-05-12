@@ -4,7 +4,7 @@ A simple pygame application to visualize 2D geometric transformations.
 <img src="image.png" alt="Deskripsi" width="720">
 
 ## Platform
-- PC
+- **PC**
 
 ## Features
 - **Animation Transform:** Using Translation, Rotation, and Scaling.
